@@ -1,0 +1,4 @@
+Thruster.c:8:6:Thruster_Init	8	static
+Thruster.c:24:6:Thruster_Stop	16	static
+Thruster.c:40:6:Thruster_Set_Speed	16	static
+Thruster.c:55:6:Thruster_Set_Perc	56	static

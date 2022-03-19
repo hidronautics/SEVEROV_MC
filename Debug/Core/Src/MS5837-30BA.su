@@ -1,0 +1,3 @@
+MS5837-30BA.c:21:6:pressure_init	32	static
+MS5837-30BA.c:45:9:check_pressure	24	static
+MS5837-30BA.c:81:9:calculate	200	static

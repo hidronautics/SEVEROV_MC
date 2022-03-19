@@ -1,0 +1,12 @@
+max7456.c:61:9:spiReadMax7456Register	32	static
+max7456.c:74:6:spiWriteMax7456Register	24	static
+max7456.c:84:6:hideOSD	8	static
+max7456.c:102:6:unhideOSD	8	static
+max7456.c:126:6:writeMax7456Chars	24	static
+max7456.c:161:6:detectVideoStandard	16	static
+max7456.c:227:6:initMax7456	16	static
+max7456.c:262:6:resetMax7456	16	static
+max7456.c:293:6:showMax7456Font	16	static
+max7456.c:338:6:waitNVM	8	static
+max7456.c:347:6:writeNVMcharacter	24	static
+max7456.c:379:6:downloadMax7456Font	16	static

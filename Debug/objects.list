@@ -1,4 +1,5 @@
 "./Core/Src/MS5837-30BA.o"
+"./Core/Src/MadgwickAHRS.o"
 "./Core/Src/Thruster.o"
 "./Core/Src/imu9dof.o"
 "./Core/Src/l3gd20.o"

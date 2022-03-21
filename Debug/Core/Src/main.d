@@ -38,7 +38,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h \
  ../Core/Inc/Thruster.h ../Core/Inc/main.h ../Core/Inc/MS5837-30BA.h \
  ../Core/Inc/max7456.h ../Core/Inc/osdWidgets.h ../Core/Inc/l3gd20.h \
- ../Core/Inc/lsm303dlhc.h ../Core/Inc/imu9dof.h
+ ../Core/Inc/lsm303dlhc.h ../Core/Inc/imu9dof.h \
+ ../Core/Inc/MadgwickAHRS.h
 
 ../Core/Inc/main.h:
 
@@ -131,3 +132,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/lsm303dlhc.h:
 
 ../Core/Inc/imu9dof.h:
+
+../Core/Inc/MadgwickAHRS.h:

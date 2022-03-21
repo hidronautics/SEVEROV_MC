@@ -421,10 +421,10 @@ void displayHeading(uint8_t currentHeading, uint8_t update)
     }
 }
 
-void displayDepth(uint8_t depth)
+void displayDepth(uint32_t depth)
 {
 	char buf[10];
-	snprintf(buf ,10, "\12%3dcm", depth); // \026 is compass \027 is degree symbol
+	snprintf(buf ,10, "\12%3dcm", depth); //
 	writeMax7456Chars(buf, 10, 0, 14,1);
 }
 

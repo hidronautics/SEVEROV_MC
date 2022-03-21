@@ -195,9 +195,3 @@ void lsm_magxyz(float* pfData)
   }
   pfData[2]=(float)((int16_t)(((uint16_t)buffer[4] << 8) + buffer[5])*1000)/Magn_Sensitivity_Z;
 }
-
-
-
-
-
-

@@ -34,6 +34,7 @@
 #include "l3gd20.h" //либа для работы с гироскопом
 #include "lsm303dlhc.h" //либа для работы с компосом и акселирометром
 #include "imu9dof.h" //либа для оброботки данных с иму
+#include "MadgwickAHRS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,8 +73,11 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-float GyroBuffer[3], AccBuffer[3], MagBuffer[3],Buffer[3];//массив для ИМУ
-float magX_bias, magY_bias; //переменные хз для чего
+
+float GyroBuffer[3], AccBuffer[3], MagBuffer[3], Buffer[3];//массив для ИМУ
+float magX_bias, magY_bias, xem; //переменные хз для чего
+char    buf[60];
+#define PI 3.14159265359
 
 uint16_t ch_[16];// массив каналов
 uint8_t buf_[22];//буфер юарт
@@ -183,10 +187,12 @@ int main(void)
   HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1); //стартуем ШИМ на серву на тилте
   resetMax7456();//ресетим МАКС
   initMax7456();//иницилизируем макс
+
   pressure_init();//иницилизируем датчик датчик глубины
 
   l3gd20_init();//иницилизируем гироскоп
   l3gd20_reboot();
+
 
   lsm_init(); //иницилизируем магнитометр и аксилирометр
   lsm_reboot();
@@ -204,17 +210,20 @@ int main(void)
 	lsm_accxyz(AccBuffer);
 	lsm_magxyz(MagBuffer);
 	//фильтруем ИМУ
-	imu9dof(AccBuffer, GyroBuffer, MagBuffer, 0.1, Buffer);
-	//выводим курс на монитор
-	displayHeading((uint8_t)Buffer[2], 1);
+
 	//выводи время с начала работы программы
 	displayMotorArmedTime(HAL_GetTick()/1000);
 	//измеряем глубину и выводим ее
-	real_depth = check_pressure();
+	uint32_t init_pressure = 0;
+	init_pressure = reset_pressure();
+	real_depth = check_pressure()-init_pressure;
 	displayDepth(real_depth);
 	//измеряем напряжение на аккумах и вывовди его
 	adc = HAL_ADC_GetValue(&hadc3);
 	displayBattery(adc*0.1064);
+	//выводим курс на монитор
+	displayHeading((uint8_t)Buffer[2], 1);
+
 
 
 
@@ -258,7 +267,6 @@ int main(void)
 		marsh_k = (ch_[1]-1000)/700.0;
 		lag_k = (ch_[0]-1000)/700.0;
 		up_k = (ch_[2]-1000)/700.0;
-
 		kurs_k =(ch_[3]-1000)/700.0;
 		kren_k = (ch_[5]-1000)/700.0;
 		diferent_k = (ch_[4]-1000)/700.0;
@@ -280,7 +288,6 @@ int main(void)
 				max = fabs(vma[i]);
 			}
 		}
-
 		//если есть привышения делим все на коэфицент
 		if(max>70)
 		{
@@ -307,28 +314,25 @@ int main(void)
 
 		for(int j=0;j<22;j++)
 		{
-			buf_[j]=0;
-			//обнуляем массив с числами
+			buf_[j]=0;//обнуляем массив с числами
 		}
 
 	  	//читаем ИМУ
+
 		l3gd20_readxyz(GyroBuffer);
 		lsm_accxyz(AccBuffer);
 		lsm_magxyz(MagBuffer);
-
 		//фильтруем ИМУ
-		imu9dof(AccBuffer, GyroBuffer, MagBuffer, 0.1, Buffer);
+		imu9dof(AccBuffer, GyroBuffer, MagBuffer, 0.01, Buffer);
 
 		//выводим курс на монитор
 		displayHeading((uint8_t)Buffer[2], 1);
-
 		//выводи время с начала работы программы
 		displayMotorArmedTime(HAL_GetTick()/1000);
-
 		//измеряем глубину и выводим ее
-		real_depth = check_pressure();
+		real_depth = check_pressure()-init_pressure;
 		displayDepth(real_depth);
-
+		HAL_Delay(10);
 		//измеряем напряжение на аккумах и вывовди его
 		adc = HAL_ADC_GetValue(&hadc3);
 		displayBattery(adc*0.1064);

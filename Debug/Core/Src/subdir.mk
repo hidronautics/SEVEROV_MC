@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/MS5837-30BA.c \
+../Core/Src/MadgwickAHRS.c \
 ../Core/Src/Thruster.c \
 ../Core/Src/imu9dof.c \
 ../Core/Src/l3gd20.c \
@@ -21,6 +22,7 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/MS5837-30BA.o \
+./Core/Src/MadgwickAHRS.o \
 ./Core/Src/Thruster.o \
 ./Core/Src/imu9dof.o \
 ./Core/Src/l3gd20.o \
@@ -36,6 +38,7 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/MS5837-30BA.d \
+./Core/Src/MadgwickAHRS.d \
 ./Core/Src/Thruster.d \
 ./Core/Src/imu9dof.d \
 ./Core/Src/l3gd20.d \
@@ -57,7 +60,7 @@ Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/MS5837-30BA.d ./Core/Src/MS5837-30BA.o ./Core/Src/Thruster.d ./Core/Src/Thruster.o ./Core/Src/imu9dof.d ./Core/Src/imu9dof.o ./Core/Src/l3gd20.d ./Core/Src/l3gd20.o ./Core/Src/lsm303dlhc.d ./Core/Src/lsm303dlhc.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/max7456.d ./Core/Src/max7456.o ./Core/Src/osdWidgets.d ./Core/Src/osdWidgets.o ./Core/Src/stm32f3xx_hal_msp.d ./Core/Src/stm32f3xx_hal_msp.o ./Core/Src/stm32f3xx_it.d ./Core/Src/stm32f3xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32f3xx.d ./Core/Src/system_stm32f3xx.o
+	-$(RM) ./Core/Src/MS5837-30BA.d ./Core/Src/MS5837-30BA.o ./Core/Src/MadgwickAHRS.d ./Core/Src/MadgwickAHRS.o ./Core/Src/Thruster.d ./Core/Src/Thruster.o ./Core/Src/imu9dof.d ./Core/Src/imu9dof.o ./Core/Src/l3gd20.d ./Core/Src/l3gd20.o ./Core/Src/lsm303dlhc.d ./Core/Src/lsm303dlhc.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/max7456.d ./Core/Src/max7456.o ./Core/Src/osdWidgets.d ./Core/Src/osdWidgets.o ./Core/Src/stm32f3xx_hal_msp.d ./Core/Src/stm32f3xx_hal_msp.o ./Core/Src/stm32f3xx_it.d ./Core/Src/stm32f3xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32f3xx.d ./Core/Src/system_stm32f3xx.o
 
 .PHONY: clean-Core-2f-Src
 

@@ -15,3 +15,4 @@ extern I2C_HandleTypeDef hi2c2;
 int32_t calculate();
 void pressure_init();
 int32_t check_pressure();
+uint32_t reset_pressure();

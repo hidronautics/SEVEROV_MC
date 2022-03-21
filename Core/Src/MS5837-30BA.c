@@ -78,6 +78,11 @@ int32_t check_pressure()
 	return calculate();
 }
 
+uint32_t reset_pressure(){
+	int32_t current_pressure;
+	return current_pressure = check_pressure();
+}
+
 int32_t calculate()
 {
 	int64_t dT = 0;
@@ -139,5 +144,5 @@ int32_t calculate()
 
 
 
-	return res[0];
+	return res[0]/10;
 }

@@ -17,6 +17,9 @@ uint8_t PROM_READ = 0xA0;
 int32_t result;
 
 HAL_StatusTypeDef ret;
+int cmp(const void *a, const void *b) {
+    return *(int*)a - *(int*)b;
+}
 
 void pressure_init()
 {
@@ -79,8 +82,15 @@ int32_t check_pressure()
 }
 
 uint32_t reset_pressure(){
-	int32_t current_pressure;
-	return current_pressure = check_pressure();
+	int32_t current_pressure[10];
+
+	for(int i =0;i<10;i++)
+	{
+		current_pressure[i]=check_pressure();
+		HAL_Delay(10);
+	}
+	qsort(current_pressure, 10, sizeof(int32_t), cmp );
+	return current_pressure[4];
 }
 
 int32_t calculate()

@@ -435,12 +435,17 @@ void displayDepth(uint32_t depth)
 void displayBattery(uint8_t osdVoltage)
 {
     char buf[20];
-
+    osdVoltage = osdVoltage*0.1064;
     if (osdVoltage!=osdVoltageLast)
     {
 	    snprintf(buf, sizeof(buf), "\20%2d.%1dV", (uint8_t)(osdVoltage / 10), (uint8_t)(osdVoltage % 10));
 	    writeMax7456Chars(buf, 7, 0, 14, 23);
 	    osdVoltageLast = osdVoltage;
+    }
+    if(osdVoltage<200)
+    {
+    	char buf1[53] = "VIRUBAI NAXIU SUKA AKKUM SEL EBAT EGO ROT IN ASS HOLE";
+    	writeMax7456Chars(buf1, 53, 1, 6,5);
     }
 }
 
@@ -453,8 +458,9 @@ uint32_t previousTime = 0;
 uint16_t previousArmedTimeSeconds = 500;
 uint32_t armedTime = 0;
 
-void displayMotorArmedTime(uint32_t currentOSDTime)
+void displayMotorArmedTime()
 {
+	uint32_t currentOSDTime = HAL_GetTick()/1000;
 
 	if (previousTime != currentOSDTime)
 	{
@@ -467,4 +473,39 @@ void displayMotorArmedTime(uint32_t currentOSDTime)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t currentHeadingP)
+{
+	int16_t currentHeadingDegY;
 
+	currentHeadingDegY = (int16_t)(currentHeadingY) % 360;
+	if (currentHeadingDegY < 0)
+		currentHeadingDegY += 360;
+
+	char bufY[6];
+	snprintf(bufY ,6, "\026%3d\027", currentHeadingDegY); // \026 is compass \027 is degree symbol
+	writeMax7456Chars(bufY, 5, 0, 3,24);
+
+	int16_t currentHeadingDegR;
+
+	currentHeadingDegR = (int16_t)(currentHeadingR) % 360;
+	if (currentHeadingDegR < 0)
+		currentHeadingDegR += 360;
+
+	char bufR[6];
+	snprintf(bufR ,6, "\026%3d\027", currentHeadingDegR); // \026 is compass \027 is degree symbol
+	writeMax7456Chars(bufR, 5, 0, 5,24);
+
+	int16_t currentHeadingDegP;
+
+	currentHeadingDegP = (int16_t)(currentHeadingP) % 360;
+	if (currentHeadingDegP < 0)
+		currentHeadingDegP += 360;
+
+	char bufP[6];
+	snprintf(bufP ,6, "\025%3d\027", currentHeadingDegP); // \026 is compass \027 is degree symbol
+	writeMax7456Chars(bufP, 5, 0, 7,24);
+
+//	char buf1[6] = "HY";
+//	writeMax7456Chars(buf1, 6, 0, 1,1);
+
+}

@@ -60,8 +60,8 @@ all: main-build
 main-build: SEVEROV_with_discovery.elf secondary-outputs
 
 # Tool invocations
-SEVEROV_with_discovery.elf: $(OBJS) $(USER_OBJS) /Users/viktoria/Downloads/disco\ 7/STM32F303VCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "SEVEROV_with_discovery.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/viktoria/Downloads/disco 7/STM32F303VCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SEVEROV_with_discovery.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+SEVEROV_with_discovery.elf: $(OBJS) $(USER_OBJS) C:\Users\Dimitrius\Documents\GitHub\SEVEROV_MC\STM32F303VCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "SEVEROV_with_discovery.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Dimitrius\Documents\GitHub\SEVEROV_MC\STM32F303VCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SEVEROV_with_discovery.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

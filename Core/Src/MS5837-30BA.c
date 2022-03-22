@@ -88,7 +88,7 @@ uint32_t reset_pressure(){
 	for(int i =0;i<10;i++)
 	{
 		current_pressure[i]=check_pressure();
-		HAL_Delay(10);
+		HAL_Delay(100);
 	}
 	qsort(current_pressure, 10, sizeof(int32_t), cmp );
 	return current_pressure[4];

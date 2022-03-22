@@ -478,7 +478,7 @@ void displayMotorArmedTime()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t currentHeadingP)
+void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t currentHeadingP,uint8_t speedVMA)
 {
 	int16_t currentHeadingDegY;
 
@@ -507,8 +507,12 @@ void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t cur
 		currentHeadingDegP += 360;
 
 	char bufP[6];
-	snprintf(bufP ,6, "\025%3d\027", currentHeadingDegP); // \026 is compass \027 is degree symbol
+	snprintf(bufP ,6, "T%3d\027", -currentHeadingDegP+118); // \026 is compass \027 is degree symbol
 	writeMax7456Chars(bufP, 5, 0, 7,24);
+
+	char bufVMA[7];
+	snprintf(bufVMA ,7, "S%2d", speedVMA); // \026 is compass \027 is degree symbol
+	writeMax7456Chars(bufVMA, 5, 0, 1,1);
 
 //	char buf1[6] = "HY";
 //	writeMax7456Chars(buf1, 6, 0, 1,1);

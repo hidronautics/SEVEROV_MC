@@ -2160,7 +2160,8 @@ HAL_StatusTypeDef HAL_ADC_Start_IT(ADC_HandleTypeDef* hadc)
       /*  - if ADC is master, ADC is enabled and conversion is started.       */
       if (ADC_NONMULTIMODE_REG_OR_MULTIMODEMASTER(hadc))
       {
-        SET_BIT(hadc->Instance->CR, ADC_CR_ADSTART);
+
+    	  SET_BIT(hadc->Instance->CR, ADC_CR_ADSTART);
       }
     }
     else

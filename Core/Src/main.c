@@ -74,7 +74,7 @@ PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
 
-float GyroBuffer[3], AccBuffer[3], MagBuffer[3], Buffer[3];//массив для �?МУ
+float GyroBuffer[3], AccBuffer[3], MagBuffer[3], Buffer[3];//массив для �?МУ
 float magX_bias, magY_bias, xem; //переменные хз для чего
 char    buf[60];
 #define PI 3.14159265359
@@ -92,6 +92,7 @@ int diferent[8] = {-0,-0,-0,-0,0,0,0,0};//вектор диффирента
 
 int vma[8] = {0,0,0,0,0,0,0,0};//суммарный вектор
 
+int max_speed = 70;
 //переменные для коэфицентов по осям
 float marsh_k;
 float lag_k;
@@ -187,8 +188,8 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc3,ADC_SINGLE_ENDED); //калибруем ацп на измерение напрежения с аккумов
 	HAL_ADC_Start_IT(&hadc3); //начинаем измерять напряжение
 
-	HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1); //стартуем Ш�?М на серву на тилте
-	Thruster_Init();//�?ницилизируем ВМА
+	HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1); //стартуем Ш�?М на серву на тилте
+	Thruster_Init();//�?ницилизируем ВМА
 
 	resetMax7456();//ресетим МАКС
 	initMax7456();//иницилизируем макс
@@ -209,11 +210,11 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-	//читаем �?МУ
+	//читаем �?МУ
 	l3gd20_readxyz(GyroBuffer);
 	lsm_accxyz(AccBuffer);
 	lsm_magxyz(MagBuffer);
-	//фильтруем �?МУ
+	//фильтруем �?МУ
 
 	//выводи время с начала работы программы
 	displayMotorArmedTime(HAL_GetTick()/1000);
@@ -236,7 +237,12 @@ int main(void)
 		HAL_UART_Receive(&huart3, (uint8_t*)buf_, 22, 10); //принимаем сообщение
 
 
-		if(buf_[0]==0xf || buf_[19]==0x0)
+		while(buf_[0]!=0xf || buf_[19]!=0x0){ //проверяем соответсвует ли посылка
+			HAL_UART_Receive(&huart3, (uint8_t*)buf_, 22, 10);//принимаем сообщение еще раз
+			HAL_GPIO_WritePin(LD8_GPIO_Port, LD8_Pin, GPIO_PIN_RESET);//индикация о не прием
+		}
+
+		if(buf_[0]==0xf && buf_[19]==0x0)
 		{
 			HAL_GPIO_WritePin(LD8_GPIO_Port, LD8_Pin, GPIO_PIN_SET); //индикация о прием
 
@@ -263,6 +269,7 @@ int main(void)
 			// 5 канал дифферент
 			// 6 канал крен
 			// 7 канал тилт
+			// 8 канал максимальная скорость
 			// 9 канал включение и выключения силового питания
 
 			// ниже вычисляем коэфиценты для каждого движения
@@ -275,6 +282,7 @@ int main(void)
 
 			tilt_k = (ch_[6]-1000)/700.0;
 
+			max_speed = (ch_[7]-75)/2000.0*70;
 			//суммируем все вектора
 			for(int j=0;j<8;j++)
 			{
@@ -291,11 +299,11 @@ int main(void)
 				}
 			}
 			//если есть привышения делим все на коэфицент
-			if(max>70)
+			if(max>max_speed)
 			{
 				for(int j=0;j<8;j++)
 				{
-					vma[j]=  (marsh[j]*marsh_k+lag[j]*lag_k+up[j]*up_k+kurs[j]*kurs_k+kren[j]*kren_k+diferent[j]*diferent_k)*70/max;
+					vma[j]=  (marsh[j]*marsh_k+lag[j]*lag_k+up[j]*up_k+kurs[j]*kurs_k+kren[j]*kren_k+diferent[j]*diferent_k)*max_speed/max;
 				}
 			}
 
@@ -304,14 +312,17 @@ int main(void)
 
 			if(ch_[8]>1100){
 				HAL_GPIO_WritePin(POWER_ON_GPIO_Port, POWER_ON_Pin, GPIO_PIN_RESET);//выключаем всю силовуху
-				videoHideMax7456(0);//выключаем видео с камеры
+			//	videoHideMax7456(0);//выключаем видео с камеры
 			}
 			else if(HAL_GPIO_ReadPin(POWER_ON_GPIO_Port, POWER_ON_Pin)==GPIO_PIN_RESET)
 
 			{
 				//включаем всю силовуху
 				HAL_GPIO_WritePin(POWER_ON_GPIO_Port, POWER_ON_Pin, GPIO_PIN_SET);
-				videoHideMax7456(1);//включаем видео с камеры
+				//раскоментить на соревах
+//				videoHideMax7456(1);//включаем видео с камеры
+//				resetMax7456();//ресетим МАКС
+
 				Thruster_Stop();
 			}
 
@@ -323,13 +334,13 @@ int main(void)
 			buf_[j]=0;//обнуляем массив с числами
 		}
 
-		//читаем �?МУ
+		//читаем �?МУ
 
 		l3gd20_readxyz(GyroBuffer);
 		lsm_accxyz(AccBuffer);
 		lsm_magxyz(MagBuffer);
 
-		//фильтруем �?МУ
+		//фильтруем �?МУ
 		imu9dof(AccBuffer, GyroBuffer, MagBuffer, 0.01, Buffer);
 
 		//выводим курс на монитор
@@ -337,13 +348,15 @@ int main(void)
 		//выводи время с начала работы программы
 		displayMotorArmedTime();
 		//измеряем глубину и выводим ее
+		if(HAL_GetTick()%50==0)
+		{
 		real_depth = check_pressure()-init_pressure;
 		displayDepth(real_depth);
-		HAL_Delay(10);
+		}
 		//измеряем напряжение на аккумах и вывовди его
 		adc = HAL_ADC_GetValue(&hadc3);
 		displayBattery(adc*0.1064);
-		displaycompas(Buffer[0],Buffer[1], tilt_k*90);
+		displaycompas(Buffer[0],Buffer[1], tilt_k*90+118,max_speed);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

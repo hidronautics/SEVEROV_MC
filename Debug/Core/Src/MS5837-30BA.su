@@ -1,5 +1,5 @@
-MS5837-30BA.c:20:5:cmp	16	static
-MS5837-30BA.c:24:6:pressure_init	32	static
-MS5837-30BA.c:48:9:check_pressure	24	static
-MS5837-30BA.c:84:10:reset_pressure	56	static
-MS5837-30BA.c:96:9:calculate	200	static
+MS5837-30BA.c:21:5:cmp	16	static
+MS5837-30BA.c:25:6:pressure_init	32	static
+MS5837-30BA.c:49:9:check_pressure	24	static
+MS5837-30BA.c:85:10:reset_pressure	56	static
+MS5837-30BA.c:97:9:calculate	200	static

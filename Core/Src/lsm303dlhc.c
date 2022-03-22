@@ -35,14 +35,14 @@ extern void Error_Handler(void);
 uint8_t lsm_read(uint16_t Addr, uint8_t Reg)
 {
 	uint8_t value = 0;	
-	HAL_I2C_Mem_Read(&hi2c1, Addr, Reg, 0x00000001U, &value, 1, 0x10000);
+	HAL_I2C_Mem_Read(&hi2c1, Addr, Reg, 0x00000001U, &value, 1, 1);
 	return value;
 }
 
 //Ghi 1 byte tu thanh ghi lsm303dlhc
 void lsm_write(uint16_t Addr, uint8_t Reg, uint8_t Value)
 {
-	HAL_I2C_Mem_Write(&hi2c1, Addr, (uint16_t)Reg, 0x00000001U, &Value, 1, 0x10000);
+	HAL_I2C_Mem_Write(&hi2c1, Addr, (uint16_t)Reg, 0x00000001U, &Value, 1, 1);
 }
 
 //Cau hinh co ban cho lsm303dlhc

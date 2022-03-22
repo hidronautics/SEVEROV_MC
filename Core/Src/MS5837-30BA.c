@@ -17,6 +17,7 @@ uint8_t PROM_READ = 0xA0;
 int32_t result;
 
 HAL_StatusTypeDef ret;
+
 int cmp(const void *a, const void *b) {
     return *(int*)a - *(int*)b;
 }

@@ -435,7 +435,7 @@ void displayDepth(uint32_t depth)
 void displayBattery(uint8_t osdVoltage)
 {
     char buf[20];
-    osdVoltage = osdVoltage*0.1064;
+    osdVoltage = osdVoltage;
     if (osdVoltage!=osdVoltageLast)
     {
 	    snprintf(buf, sizeof(buf), "\20%2d.%1dV", (uint8_t)(osdVoltage / 10), (uint8_t)(osdVoltage % 10));
@@ -446,6 +446,11 @@ void displayBattery(uint8_t osdVoltage)
     {
     	char buf1[53] = "VIRUBAI NAXIU SUKA AKKUM SEL EBAT EGO ROT IN ASS HOLE";
     	writeMax7456Chars(buf1, 53, 1, 6,5);
+    }
+    else
+    {
+    	char buf1[53] = "                                                      ";
+    	writeMax7456Chars(buf1, 53, 0, 6,5);
     }
 }
 

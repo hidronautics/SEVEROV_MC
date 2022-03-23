@@ -359,7 +359,7 @@ int main(void)
 				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_RESET);
 			}else if(rot_k < -0.5)
 			{
-				HAL_GPIO_WritePin(ROT_DIR_GPIO_Port, ROT_DIR_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(ROT_DIR_GPIO_Port, ROT_DIR_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_RESET);
 			}
 			else

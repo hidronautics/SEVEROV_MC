@@ -62,7 +62,6 @@ SPI_HandleTypeDef hspi3;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
 
 UART_HandleTypeDef huart5;
@@ -103,6 +102,12 @@ float diferent_k;
 float tilt_k;
 float main_k;
 
+float rot_k;
+float grab_k;
+
+
+int init_depth_status;
+
 uint16_t adc = 0;// переменная для измерения напряжения на акуумах
 
 int32_t real_depth = 0; //переменная для глубины
@@ -121,7 +126,6 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_SPI3_Init(void);
@@ -172,7 +176,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM4_Init();
   MX_TIM8_Init();
   MX_USART3_UART_Init();
   MX_SPI3_Init();
@@ -188,13 +191,15 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc3,ADC_SINGLE_ENDED); //калибруем ацп на измерение напрежения с аккумов
 	HAL_ADC_Start_IT(&hadc3); //начинаем измерять напряжение
 
-	HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1); //стартуем Ш�?М на серву на тилте
+	HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GRAB_ENABLE_GPIO_Port, GRAB_ENABLE_Pin, GPIO_PIN_SET);
+
 	Thruster_Init();//�?ницилизируем ВМА
 
 	resetMax7456();//ресетим МАКС
 	initMax7456();//иницилизируем макс
 
-	pressure_init();//иницилизируем датчик датчик глубины
+	init_depth_status = pressure_init();//иницилизируем датчик датчик глубины
 
 	l3gd20_init();//иницилизируем гироскоп
 	l3gd20_reboot();
@@ -205,6 +210,7 @@ int main(void)
 
 	magX_bias = 0;//хз что-ето
 	magY_bias = 0;//хз что-ето
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -219,12 +225,15 @@ int main(void)
 	//выводи время с начала работы программы
 	displayMotorArmedTime(HAL_GetTick()/1000);
 	//измеряем глубину и выводим ее
-	init_pressure = reset_pressure();
-	real_depth = check_pressure()-init_pressure;
-	displayDepth(real_depth);
+	if (init_depth_status){
+		init_pressure = reset_pressure();
+		real_depth = check_pressure()-init_pressure;
+		displayDepth(real_depth);
+	}
+	else
+		displayNoConnection();
 	//измеряем напряжение на аккумах
 	adc = HAL_ADC_GetValue(&hadc3);
-
 	//выводим курс на монитор
 	displayHeading((uint8_t)Buffer[2], 1);
 
@@ -266,11 +275,12 @@ int main(void)
 			// 2 канал марш
 			// 3 канал верх низ движ
 			// 4 канал курс
-			// 5 канал дифферент
+			// 5 канал ротации
 			// 6 канал крен
 			// 7 канал тилт
 			// 8 канал максимальная скорость
 			// 9 канал включение и выключения силового питания
+			// 10 канал схвата
 
 			// ниже вычисляем коэфиценты для каждого движения
 			marsh_k = (ch_[1]-1000)/700.0;
@@ -281,6 +291,8 @@ int main(void)
 			diferent_k = (ch_[4]-1000)/700.0;
 
 			tilt_k = (ch_[6]-1000)/700.0;
+			grab_k = (ch_[9]-1000)/700.0;
+			rot_k = (ch_[4]-1000)/700.0;
 
 			max_speed = (ch_[7]-75)/2000.0*70;
 			//суммируем все вектора
@@ -327,6 +339,32 @@ int main(void)
 			}
 
 			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 150-tilt_k*50);//задаем угол тилта
+
+			if(grab_k > 0.5)
+			{
+				HAL_GPIO_WritePin(GRAB_DIR_GPIO_Port, GRAB_DIR_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GRAB_ENABLE_GPIO_Port, GRAB_ENABLE_Pin, GPIO_PIN_RESET);
+			}else if(grab_k < -0.5)
+			{
+				HAL_GPIO_WritePin(GRAB_DIR_GPIO_Port, GRAB_DIR_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GRAB_ENABLE_GPIO_Port, GRAB_ENABLE_Pin, GPIO_PIN_RESET);
+			}
+			else
+				HAL_GPIO_WritePin(GRAB_ENABLE_GPIO_Port, GRAB_ENABLE_Pin, GPIO_PIN_SET);
+
+
+			if(rot_k > 0.5)
+			{
+				HAL_GPIO_WritePin(ROT_DIR_GPIO_Port, ROT_DIR_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_RESET);
+			}else if(rot_k < -0.5)
+			{
+				HAL_GPIO_WritePin(ROT_DIR_GPIO_Port, ROT_DIR_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_RESET);
+			}
+			else
+				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_SET);
+
 		}
 
 		for(int j=0;j<22;j++)
@@ -781,63 +819,6 @@ static void MX_TIM3_Init(void)
 }
 
 /**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 479;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 1999;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV4;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 150;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
-  HAL_TIM_MspPostInit(&htim4);
-
-}
-
-/**
   * @brief TIM8 Initialization Function
   * @param None
   * @retval None
@@ -1113,13 +1094,16 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOF, GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, MAN_IO1_Pin|MAN_IO2_Pin|MAN_IO3_Pin|MAN_IO4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GRAB_DIR_Pin|ROT_DIR_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, ROT_ENABLE_Pin|GRAB_ENABLE_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, MAN_EN1_Pin|CS_SPI3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(POWER_ON_GPIO_Port, POWER_ON_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CS_SPI3_GPIO_Port, CS_SPI3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : DRDY_Pin MEMS_INT3_Pin MEMS_INT4_Pin MEMS_INT1_Pin
                            MEMS_INT2_Pin */
@@ -1153,12 +1137,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MAN_IO1_Pin MAN_IO2_Pin MAN_IO3_Pin MAN_IO4_Pin */
-  GPIO_InitStruct.Pin = MAN_IO1_Pin|MAN_IO2_Pin|MAN_IO3_Pin|MAN_IO4_Pin;
+  /*Configure GPIO pins : GRAB_DIR_Pin ROT_DIR_Pin */
+  GPIO_InitStruct.Pin = GRAB_DIR_Pin|ROT_DIR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : ROT_ENABLE_Pin GRAB_ENABLE_Pin */
+  GPIO_InitStruct.Pin = ROT_ENABLE_Pin|GRAB_ENABLE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MAN_EN1_Pin CS_SPI3_Pin */
+  GPIO_InitStruct.Pin = MAN_EN1_Pin|CS_SPI3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pin : POWER_ON_Pin */
   GPIO_InitStruct.Pin = POWER_ON_Pin;
@@ -1166,13 +1164,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(POWER_ON_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : CS_SPI3_Pin */
-  GPIO_InitStruct.Pin = CS_SPI3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(CS_SPI3_GPIO_Port, &GPIO_InitStruct);
 
 }
 

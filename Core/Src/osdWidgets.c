@@ -478,31 +478,31 @@ void displayMotorArmedTime()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t currentHeadingP,uint8_t speedVMA)
+void displaycompas(int currentHeadingY, int currentHeadingR, int currentHeadingP,uint8_t speedVMA)
 {
-	int16_t currentHeadingDegY;
+	int currentHeadingDegY;
 
-	currentHeadingDegY = (int16_t)(currentHeadingY) % 360;
-	if (currentHeadingDegY < 0)
-		currentHeadingDegY += 360;
+	currentHeadingDegY = (int)(currentHeadingY) % 360;
+//	if (currentHeadingDegY < 0)
+//		currentHeadingDegY += 360;
 
 	char bufY[6];
 	snprintf(bufY ,6, "\026%3d\027", currentHeadingDegY); // \026 is compass \027 is degree symbol
 	writeMax7456Chars(bufY, 5, 0, 3,24);
 
-	int16_t currentHeadingDegR;
+	int currentHeadingDegR;
 
-	currentHeadingDegR = (int16_t)(currentHeadingR) % 360;
-	if (currentHeadingDegR < 0)
-		currentHeadingDegR += 360;
+	currentHeadingDegR = (int)(currentHeadingR) % 360;
+//	if (currentHeadingDegR < 0)
+//		currentHeadingDegR += 360;
 
 	char bufR[6];
 	snprintf(bufR ,6, "\026%3d\027", currentHeadingDegR); // \026 is compass \027 is degree symbol
 	writeMax7456Chars(bufR, 5, 0, 5,24);
 
-	int16_t currentHeadingDegP;
+	int currentHeadingDegP;
 
-	currentHeadingDegP = (int16_t)(currentHeadingP) % 360;
+	currentHeadingDegP = (int)(currentHeadingP) % 360;
 	if (currentHeadingDegP < 0)
 		currentHeadingDegP += 360;
 
@@ -518,3 +518,10 @@ void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t cur
 //	writeMax7456Chars(buf1, 6, 0, 1,1);
 
 }
+
+void displayNoConnection(){
+	char buf[15];
+	snprintf(buf ,10, "Not connected");
+	writeMax7456Chars(buf, 10, 0, 14,1);
+}
+

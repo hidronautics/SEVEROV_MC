@@ -74,6 +74,7 @@ void displayThrottle(uint8_t updateOSD);
 
 void displayMotorArmedTime();
 void displayDepth(uint32_t depth);
-void displaycompas(uint8_t currentHeadingY, uint8_t currentHeadingR, uint8_t currentHeadingP,uint8_t speedVMA);
+void displaycompas(int currentHeadingY, int currentHeadingR, int currentHeadingP,uint8_t speedVMA);
+void displayNoConnection();
 
 ///////////////////////////////////////////////////////////////////////////////

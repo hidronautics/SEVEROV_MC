@@ -22,14 +22,17 @@ int cmp(const void *a, const void *b) {
     return *(int*)a - *(int*)b;
 }
 
-void pressure_init()
+uint32_t pressure_init()
 {
 	HAL_I2C_Init(&hi2c2);
 	HAL_Delay(200);
 
 	uint8_t *p;
 	p = &RES_DEVICE;
-	HAL_I2C_Master_Transmit(&hi2c2, DEVICE_ADDR, p, COMMAND_LENGTH, HAL_MAX_DELAY);
+	ret = HAL_I2C_Master_Transmit(&hi2c2, DEVICE_ADDR, p, COMMAND_LENGTH, HAL_MAX_DELAY);
+	if(ret == HAL_ERROR){
+		return 0;
+	}
 	HAL_Delay(200);
 	uint8_t prom_addr = 160;
 
@@ -39,11 +42,13 @@ void pressure_init()
 		prom_addr += 2;
 		p = &prom_addr;
 		HAL_I2C_Master_Transmit(&hi2c2, DEVICE_ADDR, p, COMMAND_LENGTH, HAL_MAX_DELAY);
-
+		HAL_Delay(1);
 		HAL_I2C_Master_Receive(&hi2c2, DEVICE_ADDR, prom_buff, PROM_LENGTH, HAL_MAX_DELAY);
-
 		C[i] = (prom_buff[0] << 8) | (prom_buff[1]);
+		HAL_Delay(1);
+
 	}
+	return 1;
 }
 
 int32_t check_pressure()
@@ -76,9 +81,6 @@ int32_t check_pressure()
 			ADC_LENGTH, HAL_MAX_DELAY);
 
 	D2 = (adc_buff[0] << 16) | (adc_buff[1] << 8) | (adc_buff[2]);
-
-
-
 	return calculate();
 }
 

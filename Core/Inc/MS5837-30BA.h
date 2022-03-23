@@ -13,6 +13,6 @@ extern I2C_HandleTypeDef hi2c2;
 #define DEVICE_ADDR  0b11101100
 
 int32_t calculate();
-void pressure_init();
+uint32_t pressure_init();
 int32_t check_pressure();
 uint32_t reset_pressure();

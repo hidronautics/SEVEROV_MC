@@ -47,7 +47,7 @@ void displayAttitude(float roll, float pitch, uint8_t flightMode, uint8_t update
 // Heading Display
 ///////////////////////////////////////////////////////////////////////////////
 
-void displayHeading(uint8_t currentHeading, uint8_t update);
+void displayHeading(float currentHeading, uint8_t update);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Battery Display
@@ -73,7 +73,9 @@ void displayThrottle(uint8_t updateOSD);
 ///////////////////////////////////////////////////////////////////////////////
 
 void displayMotorArmedTime();
-void displayDepth(uint32_t depth);
+
+void displayDepth(float depth);
+
 void displaycompas(int currentHeadingY, int currentHeadingR, int currentHeadingP,uint8_t speedVMA);
 void displayNoConnection();
 

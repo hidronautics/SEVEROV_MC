@@ -371,13 +371,13 @@ const char headingBar[36] = {0x4e,0x2d,0x2d,0x7c,0x2d,0x2d,0x7c,0x2d,0x2d,
                            0x53,0x2d,0x2d,0x7c,0x2d,0x2d,0x7c,0x2d,0x2d,
                            0x57,0x2d,0x2d,0x7c,0x2d,0x2d,0x7c,0x2d,0x2d};
 
-void displayHeading(uint8_t currentHeading, uint8_t update)
+void displayHeading(float currentHeading, uint8_t update)
 {
     int16_t currentHeadingDeg;
 
     currentHeadingDeg = (int16_t)(currentHeading) % 360;
-    if (currentHeadingDeg < 0)
-		currentHeadingDeg += 360;
+//    if (currentHeadingDeg < 0)
+//		currentHeadingDeg += 360;
 
     if ((currentHeadingDeg != lastOSDheading) || update)
     {
@@ -390,15 +390,15 @@ void displayHeading(uint8_t currentHeading, uint8_t update)
     	}
 
         if (1) {
-			int8_t lastPos;
-			int8_t currentPos;
+			int16_t lastPos;
+			int16_t currentPos;
 
 			currentPos = currentHeadingDeg / 10;
 			lastPos = lastOSDheading / 10;
 
 			if ((currentPos != lastPos) || update)
 			{
-			    uint8_t x = 0;
+			    uint16_t x = 0;
 				currentPos -= 5;
 
 				if (currentPos < 0)
@@ -421,10 +421,11 @@ void displayHeading(uint8_t currentHeading, uint8_t update)
     }
 }
 
-void displayDepth(uint32_t depth)
+void displayDepth(float depth)
 {
-	char buf[10];
-	snprintf(buf ,10, "\12%3dcm", depth); //
+	char buf[20]={0};
+	depth*=0.53;
+	snprintf(buf, sizeof(buf), "\12%3dcm", (int16_t)depth);//*0.53); //
 	writeMax7456Chars(buf, 10, 0, 14,1);
 }
 

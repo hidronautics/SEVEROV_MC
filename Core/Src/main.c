@@ -200,8 +200,8 @@ int main(void)
 
 	resetMax7456();//ресетим МАКС
 	initMax7456();//иницилизируем макс
-	//downloadMax7456Font();
-
+//	downloadMax7456Font();
+//	showMax7456Font();
 	init_depth_status = pressure_init();//иницилизируем датчик датчик глубины
 
 	l3gd20_init();//иницилизируем гироскоп
@@ -238,7 +238,7 @@ int main(void)
 	//измеряем напряжение на аккумах
 	adc = HAL_ADC_GetValue(&hadc3);
 	//выводим курс на монитор
-	displayHeading((uint8_t)Buffer[2], 1);
+	displayHeading(Buffer[2], 1);
 
 
 
@@ -249,10 +249,10 @@ int main(void)
 		HAL_UART_Receive(&huart3, (uint8_t*)buf_, 22, 10); //принимаем сообщение
 
 
-//		while(buf_[0]!=0xf || buf_[19]!=0x0){ //проверяем соответсвует ли посылка
-//			HAL_UART_Receive(&huart3, (uint8_t*)buf_, 22, 10);//принимаем сообщение еще раз
-//			HAL_GPIO_WritePin(LD8_GPIO_Port, LD8_Pin, GPIO_PIN_RESET);//индикация о не прием
-//		}
+		while(buf_[0]!=0xf || buf_[19]!=0x0){ //проверяем соответсвует ли посылка
+			HAL_UART_Receive(&huart3, (uint8_t*)buf_, 22, 10);//принимаем сообщение еще раз
+			HAL_GPIO_WritePin(LD8_GPIO_Port, LD8_Pin, GPIO_PIN_RESET);//индикация о не прием
+		}
 
 		if(buf_[0]==0xf && buf_[19]==0x0)
 		{
@@ -327,7 +327,7 @@ int main(void)
 
 			if(ch_[8]>1100){
 				HAL_GPIO_WritePin(POWER_ON_GPIO_Port, POWER_ON_Pin, GPIO_PIN_RESET);//выключаем всю силовуху
-				//	videoHideMax7456(0);//выключаем видео с камеры
+				//videoHideMax7456(0);//выключаем видео с камеры
 			}
 			else if(HAL_GPIO_ReadPin(POWER_ON_GPIO_Port, POWER_ON_Pin)==GPIO_PIN_RESET)
 
@@ -335,19 +335,25 @@ int main(void)
 				//включаем всю силовуху
 				HAL_GPIO_WritePin(POWER_ON_GPIO_Port, POWER_ON_Pin, GPIO_PIN_SET);
 				//раскоментить на соревах
-				//				videoHideMax7456(1);//включаем видео с камеры
-				//				resetMax7456();//ресетим МАКС
+//								videoHideMax7456(1);//включаем видео с камеры
+//								resetMax7456();//ресетим МАКС
 				resetMax7456();//ресетим МАКС
 				initMax7456();//иницилизируем макс
 
 				HAL_GPIO_WritePin(GRAB_ENABLE_GPIO_Port, GRAB_ENABLE_Pin, GPIO_PIN_SET); //ресетим ман
 				HAL_GPIO_WritePin(ROT_ENABLE_GPIO_Port, ROT_ENABLE_Pin, GPIO_PIN_SET);
 
-				init_depth_status = pressure_init();//иницилизируем датчик датчик глубины
+				//init_depth_status = pressure_init();//иницилизируем датчик датчик глубины
+				//init_pressure = reset_pressure();
+				//real_depth = check_pressure()-init_pressure;
+
+
+
 				l3gd20_init();//иницилизируем гироскоп
 				l3gd20_reboot();
 				lsm_init(); //иницилизируем магнитометр и аксилирометр
 				lsm_reboot();
+				imu9dof(AccBuffer, GyroBuffer, MagBuffer, Buffer,0.2);//сброс иму
 				Thruster_Stop();
 			}
 
@@ -392,10 +398,10 @@ int main(void)
 		lsm_magxyz(MagBuffer);
 
 		//фильтруем �?МУ
-		imu9dof(AccBuffer, GyroBuffer, MagBuffer, 0.1, Buffer);
+		imu9dof(AccBuffer, GyroBuffer, MagBuffer, Buffer,0.1);
 
 		//выводим курс на монитор
-		displayHeading((uint8_t)Buffer[2], 1);
+		displayHeading(Buffer[2], 1);
 		//выводи время с начала работы программы
 		displayMotorArmedTime();
 		//измеряем глубину и выводим ее

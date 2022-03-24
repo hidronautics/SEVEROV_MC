@@ -444,8 +444,8 @@ void displayBattery(uint8_t osdVoltage)
     }
     if(osdVoltage<200)
     {
-    	char buf1[53] = "VIRUBAI NAXIU SUKA AKKUM SEL EBAT EGO ROT IN ASS HOLE";
-    	writeMax7456Chars(buf1, 53, 1, 6,5);
+    	char buf1[10] = "LOW BATTERY";
+    	writeMax7456Chars(buf1, 10, 1, 6,5);
     }
     else
     {

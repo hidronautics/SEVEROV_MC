@@ -3,7 +3,7 @@ osdWidgets.c:243:6:displayArtificialHorizon	32	static
 osdWidgets.c:293:6:displayAttitude	64	static
 osdWidgets.c:374:6:displayHeading	40	static
 osdWidgets.c:424:6:displayDepth	40	static
-osdWidgets.c:435:6:displayBattery	112	static
+osdWidgets.c:435:6:displayBattery	120	static
 osdWidgets.c:466:6:displayMotorArmedTime	40	static
 osdWidgets.c:481:6:displaycompas	80	static
 osdWidgets.c:522:6:displayNoConnection	32	static

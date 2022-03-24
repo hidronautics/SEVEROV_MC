@@ -22,7 +22,7 @@ int cmp(const void *a, const void *b) {
     return *(int*)a - *(int*)b;
 }
 
-uint32_t pressure_init()
+	uint32_t pressure_init()
 {
 	HAL_I2C_Init(&hi2c2);
 	HAL_Delay(200);
